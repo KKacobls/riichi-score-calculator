@@ -1,0 +1,47 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc; /* slate-50 */
+    color: #1e293b; /* slate-800 */
+}
+.control-button, .counter-btn, .meld-type-btn, .meld-tile-btn {
+    transition: all 0.2s ease-in-out;
+}
+.control-button:hover, .counter-btn:hover, .meld-type-btn:hover, .meld-tile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+/* Custom styles for checked labels */
+.yaku-label input:checked + div {
+    background-color: #22c55e; /* green-500 */
+    color: white;
+    border-color: #16a34a; /* green-600 */
+}
+.yaku-label input:checked + div .han-badge {
+    background-color: white;
+    color: #22c55e; /* green-500 */
+}
+/* Custom scrollbar */
+#yaku-list-container::-webkit-scrollbar { width: 8px; }
+#yaku-list-container::-webkit-scrollbar-track { background: #f1f5f9; }
+#yaku-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+#yaku-list-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* Hide number input arrows */
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+/* Meld button active state */
+.meld-tile-btn.active {
+    background-color: #f97316; /* orange-500 */
+    color: white;
+}
+.info-card img {
+    border: 1px solid #e2e8f0; /* slate-200 */
+    border-radius: 0.5rem;
+}
+/* Fu breakdown text style */
+#fu-breakdown {
+    transition: opacity 0.3s ease-in-out;
+}

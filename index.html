@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta name="author" content="claude & kkacobls">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本麻將分數計算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Warm Neutral with Muted Green Accents -->
+    <!-- Application Structure Plan: The application uses a responsive two-column grid. The left column contains all user inputs. The right column is a sticky results panel that updates in real-time. A new checkbox in "Basic Settings" toggles the visibility of a detailed Fu calculation breakdown in the results panel. This enhances transparency for users learning the Fu rules. The layout remains fully responsive. -->
+    <!-- Visualization & Content Choices: The main visualization is the dynamic results panel. The key addition is the Fu breakdown feature. This translates the abstract calculation into a clear, additive formula (e.g., 20+10+2=32 -> 40), which is the most effective way to explain the process. The feature is off by default to maintain a clean interface for experienced users. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-700">日麻分數計算器</h1>
+            <p class="text-slate-500 mt-2">根據您的和牌情況，輕鬆計算點數</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Controls -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Section 1: Game Settings -->
+                <section class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">基本設定</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Player Status -->
+                        <div>
+                            <label class="font-semibold text-slate-600">玩家身份</label>
+                            <button id="player-status-btn" class="w-full mt-2 p-3 rounded-lg font-bold text-white bg-emerald-500 control-button">莊家 (Oya)</button>
+                        </div>
+                        <!-- Honba -->
+                        <div class="flex flex-col">
+                            <label class="font-semibold text-slate-600">本場數</label>
+                            <div class="flex items-center mt-2">
+                                <button data-target="honba" class="counter-btn minus px-4 py-3 bg-slate-200 rounded-l-lg font-bold text-lg">-</button>
+                                <input disabled type="number" id="honba-display" value="0" class="w-full text-center p-3 border-t border-b bg-white border-slate-300 outline-none">
+                                <button data-target="honba" class="counter-btn plus px-4 py-3 bg-slate-200 rounded-r-lg font-bold text-lg">+</button>
+                            </div>
+                        </div>
+                         <!-- Fu Breakdown Checkbox -->
+                        <div class="sm:col-span-2">
+                            <label for="fu-check" class="flex items-center space-x-2 p-3 bg-slate-100 rounded-lg cursor-pointer yaku-label">
+                                <input type="checkbox" id="fu-check" class="hidden">
+                                <div class="w-full text-center font-semibold">顯示符數明細</div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 1.5: Dora & Yakuhai -->
+                 <section class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">飜數來源</h2>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">寶牌 (Dora)</label><div class="flex items-center mt-2"><button data-target="dora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="dora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="dora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">裏寶牌 (Ura)</label><div class="flex items-center mt-2"><button data-target="uraDora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="uraDora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="uraDora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">赤寶牌 (Aka)</label><div class="flex items-center mt-2"><button data-target="akaDora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="akaDora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="akaDora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">役牌：白發中</label><div class="flex items-center mt-2"><button data-target="sangenpai" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="sangenpai-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="sangenpai" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">役牌：場風</label><div class="flex items-center mt-2"><button data-target="bakaze" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="bakaze-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="bakaze" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                        <div class="flex flex-col"><label class="font-semibold text-slate-600">役牌：自風</label><div class="flex items-center mt-2"><button data-target="jikaze" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="jikaze-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="jikaze" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
+                     </div>
+                 </section>
+                
+                <!-- Section 2: Yaku List -->
+                <section class="bg-white p-6 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2 flex-wrap gap-4">
+                        <h2 class="text-2xl font-bold text-slate-700">役種選擇</h2>
+                        <div class="flex space-x-4" id="one-han-yaku-options">
+                            <label class="flex items-center space-x-2 p-2 bg-slate-100 rounded-lg cursor-pointer flex-1 justify-center yaku-label">
+                                <input type="checkbox" id="riichi-check" class="hidden">
+                                <div class="px-2 text-center font-semibold">立直</div>
+                            </label>
+                            <label class="flex items-center space-x-2 p-2 bg-slate-100 rounded-lg cursor-pointer flex-1 justify-center yaku-label">
+                                <input type="checkbox" id="ippatsu-check" class="hidden">
+                                <div class="px-2 text-center font-semibold">一發</div>
+                            </label>
+                       </div>
+                    </div>
+                    <div id="yaku-list-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2">
+                    </div>
+                </section>
+
+                <!-- Section 3: Fu Conditions -->
+                <section id="fu-details" class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">符數條件</h2>
+                     <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><h3 class="font-semibold text-slate-600 mb-2">和牌方式</h3><div class="flex gap-2" id="win-method-radios"><label class="p-3 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label flex-1"><input type="radio" name="winMethod" value="tsumo" class="hidden" checked><div class="font-semibold">自摸</div></label><label class="p-3 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label flex-1"><input type="radio" name="winMethod" value="ron" class="hidden"><div class="font-semibold">榮和</div></label></div></div>
+                            <div><h3 class="font-semibold text-slate-600 mb-2">門前清</h3><div class="flex gap-2" id="menzen-radios"><label class="p-3 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label flex-1"><input type="radio" name="menzen" value="true" class="hidden" checked><div class="font-semibold">門清</div></label><label class="p-3 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label flex-1"><input type="radio" name="menzen" value="false" class="hidden"><div class="font-semibold">副露</div></label></div></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><h3 class="font-semibold text-slate-600 mb-2">雀頭 (對子)</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="pair-type-radios"><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="pair" value="non_value" class="hidden" checked><div class="font-semibold">客風 (0符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="pair" value="sangenpai" class="hidden"><div class="font-semibold">三元牌 (2符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="pair" value="jikaze" class="hidden"><div class="font-semibold">自風 (2符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="pair" value="bakaze" class="hidden"><div class="font-semibold">場風 (2符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="pair" value="renhouhai" class="hidden"><div class="font-semibold">連風 (4符)</div></label></div></div>
+                            <div><h3 class="font-semibold text-slate-600 mb-2">聽牌型態 (加2符)</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="wait-type-radios"><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="wait" value="ryanmen" class="hidden" checked><div class="font-semibold">兩面/雙碰(0符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="wait" value="kanchan" class="hidden"><div class="font-semibold">嵌張 (2符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="wait" value="penchan" class="hidden"><div class="font-semibold">邊張 (2符)</div></label><label class="p-2 bg-slate-100 rounded-lg text-center cursor-pointer yaku-label text-sm"><input type="radio" name="wait" value="tanki" class="hidden"><div class="font-semibold">單騎 (2符)</div></label></div></div>
+                        </div>
+                        <div><h3 class="font-semibold text-slate-600 mb-2">面子 (四組)</h3><div id="melds-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div></div>
+                    </div>
+                </section>
+                
+                <!-- Section 4: Guides -->
+                <section class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">規則說明</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="info-card"><a href="image1.png" target="_blank"><img src="image1.png" alt="子家點數" class="w-full h-auto object-cover mb-2 rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/400x250/e0f2fe/0c4a6e?text=Image+1+Not+Found';"></a><h4 class="font-semibold">子家</h4></div>
+                        <div class="info-card"><a href="image2.png" target="_blank"><img src="image2.png" alt="親家點數" class="w-full h-auto object-cover mb-2 rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/400x250/dcfce7/14532d?text=Image+2+Not+Found';"></a><h4 class="font-semibold">親家</h4></div>
+                        <div class="info-card"><a href="image3.png" target="_blank"><img src="image3.png" alt="符數計算" class="w-full h-auto object-cover mb-2 rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/400x250/fffbeb/b45309?text=Image+3+Not+Found';"></a><h4 class="font-semibold">符數計算</h4></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-8 bg-slate-800 text-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold mb-6 border-b border-slate-600 pb-3">計算結果</h2>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-lg text-slate-300">飜數 (Han)</span>
+                            <span id="han-result" class="text-4xl font-bold text-green-400">0</span>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-lg text-slate-300">符數 (Fu)</span>
+                                <span id="fu-result" class="text-4xl font-bold text-sky-400">0</span>
+                            </div>
+                            <!-- Fu Breakdown Display -->
+                            <div id="fu-breakdown" class="text-right text-xs text-sky-300 mt-1 h-4 opacity-0"></div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-600">
+                             <div id="score-breakdown-title" class="text-lg text-slate-300 mb-2">點數支付</div>
+                             <div id="score-result" class="text-2xl font-bold text-amber-400 text-center h-24 flex items-center justify-center">
+                                 請選擇和牌條件
+                             </div>
+                        </div>
+                    </div>
+
+                    <button id="clear-btn" class="w-full mt-8 p-4 rounded-lg font-bold text-slate-800 bg-amber-400 hover:bg-amber-300 control-button">
+                        全部清除
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+                <!-- Section 4: Guides -->
+                <section class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">規則說明</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <!--https://placehold.co/400x250/e0f2fe/0c4a6e?text=Image+1
+                            https://placehold.co/400x250/dcfce7/14532d?text=Image+2
+                            https://placehold.co/400x250/fffbeb/b45309?text=Image+3-->
+                            <div class="info-card">
+                                <a href="image1.png" target="_blank">
+                                    <img src="img/image1.png" alt="子家點數" class="w-full h-auto object-cover mb-2 rounded-lg"
+                                         onerror="this.onerror=null;this.src='https://placehold.co/400x250/e0f2fe/0c4a6e?text=Image+Not+Found';">
+                                </a>
+                                <h4 class="font-semibold">子家</h4>
+                            </div>
+                            
+                            <div class="info-card">
+                                <a href="image2.png" target="_blank">
+                                    <img src="img/image2.png" alt="親家點數" class="w-full h-auto object-cover mb-2 rounded-lg"
+                                         onerror="this.onerror=null;this.src='https://placehold.co/400x250/dcfce7/14532d?text=Image+Not+Found';">
+                                </a>
+                                <h4 class="font-semibold">親家</h4>
+                            </div>
+                            
+                            <div class="info-card">
+                                <a href="image3.png" target="_blank">
+                                    <img src="img/image3.png" alt="符數計算" class="w-full h-auto object-cover mb-2 rounded-lg"
+                                         onerror="this.onerror=null;this.src='https://placehold.co/400x250/fffbeb/b45309?text=Image+Not+Found';">
+                                </a>
+                                <h4 class="font-semibold">符數計算</h4>
+                            </div>
+                    </div>
+                </section>
+</body>
+</html>
