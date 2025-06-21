@@ -1,14 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const yakuData = [
-        { id: 'tsumo', name_jp: '門前清自摸和', han_closed: 1, han_open: null }, { id: 'pinfu', name_jp: '平和', han_closed: 1, han_open: null },
-        { id: 'tanyao', name_jp: '断么九', han_closed: 1, han_open: 1 }, { id: 'iipeikou', name_jp: '一盃口', han_closed: 1, han_open: null },
-        { id: 'rinshan', name_jp: '嶺上開花', han_closed: 1, han_open: 1 }, { id: 'chankan', name_jp: '槍槓', han_closed: 1, han_open: 1 },
-        { id: 'haitei', name_jp: '海底摸月/河底撈魚', han_closed: 1, han_open: 1 }, { id: 'chiitoitsu', name_jp: '七對子', han_closed: 2, han_open: null },
-        { id: 'toitoi', name_jp: '對對和', han_closed: 2, han_open: 2 }, { id: 'sanankou', name_jp: '三暗刻', han_closed: 2, han_open: 2 },
-        { id: 'sankantsu', name_jp: '三槓子', han_closed: 2, han_open: 2 }, { id: 'sanshoku_doukou', name_jp: '三色同刻', han_closed: 2, han_open: 2 },
-        { id: 'honroutou', name_jp: '混老頭', han_closed: 2, han_open: 2 }, { id: 'shousangen', name_jp: '小三元', han_closed: 2, han_open: 2 },
-        { id: 'ryanpeikou', name_jp: '二盃口', han_closed: 3, han_open: null },
+        { id: 'tsumo', name_jp: '門前清自摸和(1翻)', han_closed: 1, han_open: null }, 
+        { id: 'pinfu', name_jp: '平和(1翻)', han_closed: 1, han_open: null },
+        { id: 'tanyao', name_jp: '断么九(1翻)', han_closed: 1, han_open: 1 }, 
+        { id: 'iipeikou', name_jp: '一盃口(1翻)', han_closed: 1, han_open: null },
+        { id: 'rinshan', name_jp: '嶺上開花(1翻)', han_closed: 1, han_open: 1 }, 
+        { id: 'chankan', name_jp: '槍槓(1翻)', han_closed: 1, han_open: 1 },
+        { id: 'haitei', name_jp: '海底摸月/河底撈魚(1翻)', han_closed: 1, han_open: 1 },
+        { id: 'sanshoku_doujun', name_jp: '三色同順(2翻)', han_closed: 2, han_open: 1 },
+        { id: 'ikkitsuukan', name_jp: '一氣通貫(2翻)', han_closed: 2, han_open: 1 },
+        { id: 'honchantaiyou', name_jp: '混全帶么九(2翻)', han_closed: 2, han_open: 1 },
+        { id: 'chiitoitsu', name_jp: '七對子(2翻)', han_closed: 2, han_open: null },
+        { id: 'toitoi', name_jp: '對對和(2翻)', han_closed: 2, han_open: 2 }, 
+        { id: 'sanankou', name_jp: '三暗刻(2翻)', han_closed: 2, han_open: 2 },
+        { id: 'sankantsu', name_jp: '三槓子(2翻)', han_closed: 2, han_open: 2 }, 
+        { id: 'sanshoku_doukou', name_jp: '三色同刻(2翻)', han_closed: 2, han_open: 2 },
+        { id: 'honroutou', name_jp: '混老頭(2翻)', han_closed: 2, han_open: 2 }, 
+        { id: 'shousangen', name_jp: '小三元(2翻)', han_closed: 2, han_open: 2 },
+        { id: 'junchan', name_jp: '純全帶么九(3翻)', han_closed: 3, han_open: 2 },
+        { id: 'honitsu', name_jp: '混一色(3翻)', han_closed: 3, han_open: 2 },
+        { id: 'ryanpeikou', name_jp: '二盃口(3翻)', han_closed: 3, han_open: null },
+        { id: 'chinitsu', name_jp: '清一色(6翻)', han_closed: 6, han_open: 5 },
     ];
     
     const meldTypes = ['shuntsu', 'minkou', 'ankou', 'minkan', 'ankan'];
@@ -16,19 +29,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const initialMelds = Array(4).fill({ type: 'shuntsu', isYaochu: false });
 
-    let gameState = {
-        isOya: true, honba: 0, dora: 0, uraDora: 0, akaDora: 0, sangenpai: 0, bakaze: 0, jikaze: 0,
-        isRiichi: false, isIppatsu: false, isMenzen: true, winMethod: 'tsumo', showFuBreakdown: false,
-        yakuSelected: [],
-        fuConditions: {
-            wait: 'ryanmen', pair: 'non_value', melds: JSON.parse(JSON.stringify(initialMelds))
-        },
-        options: { kiriageMangan: true, }
-    };
+    let gameState = {};
+
+    function getInitialGameState() {
+        const initialState = {
+            isOya: true, honba: 0, dora: 0, uraDora: 0, akaDora: 0, sangenpai: 0, bakaze: 0, jikaze: 0,
+            isRiichi: false, isIppatsu: false, isMenzen: true, winMethod: 'tsumo', showFuBreakdown: false,
+            yakuStates: {},
+            fuConditions: {
+                wait: 'ryanmen', pair: 'non_value', melds: JSON.parse(JSON.stringify(initialMelds))
+            },
+            options: { kiriageMangan: true, }
+        };
+        // Initialize all yaku states to 0 (off)
+        yakuData.forEach(yaku => {
+            initialState.yakuStates[yaku.id] = 0;
+        });
+        return initialState;
+    }
 
     const DOMElements = {
+        yakuContainer: document.getElementById('yaku-container'),
         playerStatusBtn: document.getElementById('player-status-btn'),
-        yakuListContainer: document.getElementById('yaku-list-container'),
         clearBtn: document.getElementById('clear-btn'),
         hanResultEl: document.getElementById('han-result'),
         fuResultEl: document.getElementById('fu-result'),
@@ -43,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     function init() {
+        gameState = getInitialGameState();
         populateYakuList();
         populateMelds();
         setupEventListeners();
@@ -51,12 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateYakuList() {
-        DOMElements.yakuListContainer.innerHTML = yakuData
+        const yakuHtml = yakuData
             .sort((a, b) => (a.han_closed || a.han_open) - (b.han_closed || b.han_open) || a.name_jp.localeCompare(b.name_jp))
-            .map(yaku => {
-                const hanValue = `${yaku.han_closed || yaku.han_open}飜`;
-                return `<label class="yaku-label cursor-pointer"><input type="checkbox" value="${yaku.id}" class="hidden yaku-checkbox"><div class="p-2 border border-slate-200 rounded-lg text-center h-full flex flex-col justify-between"><span class="text-sm font-semibold">${yaku.name_jp}</span><span class="han-badge text-xs bg-slate-200 text-slate-600 rounded-full px-2 py-0.5 mt-1">${hanValue}</span></div></label>`;
-            }).join('');
+            .map(yaku => `
+                <button class="yaku-btn p-2 border border-slate-200 rounded-lg text-center h-full flex flex-col justify-center text-sm font-semibold" data-yaku-id="${yaku.id}">
+                    ${yaku.name_jp}
+                </button>
+            `).join('');
+        DOMElements.yakuContainer.innerHTML = yakuHtml;
     }
 
     function populateMelds() {
@@ -75,19 +100,46 @@ document.addEventListener('DOMContentLoaded', () => {
             gameState[target] = isPlus ? gameState[target] + 1 : Math.max(0, gameState[target] - 1);
             updateAndCalculate();
         }));
+
+        DOMElements.yakuContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('.yaku-btn');
+            if (!target) return;
+            const yakuId = target.dataset.yakuId;
+            const yaku = yakuData.find(y => y.id === yakuId);
+            if (!yaku) return;
+
+            let currentState = gameState.yakuStates[yakuId];
+            let nextState = 0;
+
+            // State machine logic
+            if (yaku.han_open !== null && yaku.han_open < yaku.han_closed) { // Has kui-sagari
+                if (currentState === 0) nextState = 1;      // Off -> Closed
+                else if (currentState === 1) nextState = 2; // Closed -> Open
+                else nextState = 0;                         // Open -> Off
+            } else { // No kui-sagari
+                nextState = currentState === 0 ? 1 : 0; // Off <-> On
+            }
+            
+            gameState.yakuStates[yakuId] = nextState;
+            handleYakuDependencies();
+            updateAndCalculate();
+        });
+
         DOMElements.riichiCheck.addEventListener('change', (e) => { gameState.isRiichi = e.target.checked; updateAndCalculate(); });
         DOMElements.ippatsuCheck.addEventListener('change', (e) => { gameState.isIppatsu = e.target.checked; updateAndCalculate(); });
         DOMElements.fuCheck.addEventListener('change', (e) => { gameState.showFuBreakdown = e.target.checked; updateAndCalculate(); });
-        DOMElements.yakuListContainer.addEventListener('change', (e) => {
-            if(e.target.classList.contains('yaku-checkbox')){ gameState.yakuSelected = Array.from(document.querySelectorAll('.yaku-checkbox:checked')).map(el => el.value); handleYakuDependencies(); updateAndCalculate(); }
-        });
-        document.querySelectorAll('input[name="winMethod"], input[name="menzen"], input[name="wait"], input[name="pair"]').forEach(radio => radio.addEventListener('change', () => {
+
+        document.querySelectorAll('input[name="winMethod"], input[name="menzen"]').forEach(radio => radio.addEventListener('change', () => {
             gameState.winMethod = document.querySelector('input[name="winMethod"]:checked').value;
             gameState.isMenzen = document.querySelector('input[name="menzen"]:checked').value === 'true';
-            gameState.fuConditions.wait = document.querySelector('input[name="wait"]:checked').value;
-            gameState.fuConditions.pair = document.querySelector('input[name="pair"]:checked').value;
             handleMenzenChange(); updateAndCalculate();
         }));
+        document.querySelectorAll('input[name="wait"], input[name="pair"]').forEach(radio => radio.addEventListener('change', () => {
+             gameState.fuConditions.wait = document.querySelector('input[name="wait"]:checked').value;
+            gameState.fuConditions.pair = document.querySelector('input[name="pair"]:checked').value;
+            updateAndCalculate();
+        }));
+
         DOMElements.meldsContainer.addEventListener('click', (e) => {
             const target = e.target; const index = target.dataset.meldIndex; if (index === undefined) return;
             if (target.classList.contains('meld-type-btn')) {
@@ -100,22 +152,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function handleYakuDependencies() {
-        const selectedSet = new Set(gameState.yakuSelected);
-        if (selectedSet.has('chiitoitsu') || selectedSet.has('pinfu')) {
+        if (gameState.yakuStates['chiitoitsu'] > 0 || gameState.yakuStates['pinfu'] > 0) {
             document.querySelector('input[name="menzen"][value="true"]').checked = true;
-            gameState.isMenzen = true; handleMenzenChange();
+            gameState.isMenzen = true;
         }
     }
     
     function handleMenzenChange() {
-        const menzen = gameState.isMenzen;
-        document.querySelectorAll('.yaku-checkbox').forEach(cb => {
-            const yaku = yakuData.find(y => y.id === cb.value);
-            if (yaku && yaku.han_open === null && !menzen) {
-                cb.checked = false; cb.disabled = true; cb.parentElement.classList.add('opacity-50', 'cursor-not-allowed');
-            } else { cb.disabled = false; cb.parentElement.classList.remove('opacity-50', 'cursor-not-allowed'); }
-        });
-        gameState.yakuSelected = Array.from(document.querySelectorAll('.yaku-checkbox:checked')).map(el => el.value);
+        // This function is now simpler, mainly just for UI updates.
+        // The core logic of han value is now controlled by the yaku state machine.
         updateRadioStyles();
     }
 
@@ -128,8 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateHan() {
-        let totalHan = 0; const selectedSet = new Set(gameState.yakuSelected);
-        selectedSet.forEach(id => { const yaku = yakuData.find(y => y.id === id); if (yaku) { totalHan += gameState.isMenzen ? (yaku.han_closed || 0) : (yaku.han_open || 0); } });
+        let totalHan = 0; 
+        
+        // Calculate from yaku states
+        for (const yakuId in gameState.yakuStates) {
+            const state = gameState.yakuStates[yakuId];
+            if (state > 0) {
+                const yaku = yakuData.find(y => y.id === yakuId);
+                if (state === 1) { // Closed state or only one state
+                    totalHan += yaku.han_closed;
+                } else if (state === 2) { // Open state
+                    totalHan += yaku.han_open;
+                }
+            }
+        }
+
         if (gameState.isRiichi) totalHan += 1; if (gameState.isIppatsu) totalHan += 1;
         totalHan += gameState.sangenpai + gameState.bakaze + gameState.jikaze;
         totalHan += gameState.dora + gameState.uraDora + gameState.akaDora;
@@ -137,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateFu() {
-        const selectedSet = new Set(gameState.yakuSelected); const breakdown = [];
-        if(selectedSet.has('chiitoitsu')) { DOMElements.fuDetailsSection.classList.add('opacity-30'); return { finalFu: 25, breakdown: [{fu: 25, reason: '七對子特殊計算'}] }; }
-        const pinfuConditionsMet = selectedSet.has('pinfu') && gameState.isMenzen && gameState.fuConditions.wait === 'ryanmen' && !['sangenpai', 'jikaze', 'bakaze', 'renhouhai'].includes(gameState.fuConditions.pair) && gameState.fuConditions.melds.every(m => m.type === 'shuntsu');
+        const breakdown = [];
+        if(gameState.yakuStates['chiitoitsu'] > 0) { DOMElements.fuDetailsSection.classList.add('opacity-30'); return { finalFu: 25, breakdown: [{fu: 25, reason: '七對子特殊計算'}] }; }
+        const pinfuConditionsMet = gameState.yakuStates['pinfu'] > 0 && gameState.isMenzen && gameState.fuConditions.wait === 'ryanmen' && !['sangenpai', 'jikaze', 'bakaze', 'renhouhai'].includes(gameState.fuConditions.pair) && gameState.fuConditions.melds.every(m => m.type === 'shuntsu');
         if(pinfuConditionsMet) { DOMElements.fuDetailsSection.classList.add('opacity-30'); if (gameState.winMethod === 'tsumo') return { finalFu: 20, breakdown: [{fu: 20, reason: '平和自摸'}] }; if (gameState.winMethod === 'ron') return { finalFu: 30, breakdown: [{fu: 30, reason: '平和榮和'}] }; }
         DOMElements.fuDetailsSection.classList.remove('opacity-30');
         let fu = 20; breakdown.push({fu: 20, reason: '底符'});
@@ -182,13 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayResults(han, fu, breakdown) {
         DOMElements.hanResultEl.textContent = han; DOMElements.fuResultEl.textContent = fu;
         if (gameState.showFuBreakdown && breakdown) {
-            const breakdownText = breakdown.map(item => `${item.fu}(${item.reason})`).join(' + ');
+            const breakdownText = breakdown.map(item => `${item.reason}${item.fu}`).join('+');
             const rawFu = breakdown.reduce((sum, item) => sum + item.fu, 0);
-            if (fu !== rawFu && fu > 20) {
-                DOMElements.fuBreakdownEl.textContent = `${breakdownText} = ${rawFu} → ${fu}符`;
-            } else {
-                DOMElements.fuBreakdownEl.textContent = breakdownText;
-            }
+            DOMElements.fuBreakdownEl.textContent = (fu !== rawFu && fu > 20) ? `${breakdownText} = ${rawFu} → ${fu}符` : breakdownText;
             DOMElements.fuBreakdownEl.classList.remove('opacity-0');
         } else {
             DOMElements.fuBreakdownEl.classList.add('opacity-0');
@@ -206,12 +260,33 @@ document.addEventListener('DOMContentLoaded', () => {
         DOMElements.playerStatusBtn.className = `w-full mt-2 p-3 rounded-lg font-bold text-white control-button ${gameState.isOya ? 'bg-emerald-500' : 'bg-sky-500'}`;
         for(const key of ['honba', 'dora', 'uraDora', 'akaDora', 'sangenpai', 'bakaze', 'jikaze']){ document.getElementById(`${key}-display`).value = gameState[key]; }
         DOMElements.riichiCheck.checked = gameState.isRiichi; DOMElements.ippatsuCheck.checked = gameState.isIppatsu; DOMElements.fuCheck.checked = gameState.showFuBreakdown;
-        document.querySelectorAll('.yaku-checkbox').forEach(cb => { cb.checked = gameState.yakuSelected.includes(cb.value); });
         document.querySelector(`input[name="winMethod"][value="${gameState.winMethod}"]`).checked = true;
         document.querySelector(`input[name="menzen"][value="${gameState.isMenzen}"]`).checked = true;
         document.querySelector(`input[name="wait"][value="${gameState.fuConditions.wait}"]`).checked = true;
         document.querySelector(`input[name="pair"][value="${gameState.fuConditions.pair}"]`).checked = true;
-        updateRadioStyles(); updateMeldButtons(); handleMenzenChange();
+        updateRadioStyles(); 
+        updateMeldButtons(); 
+        updateYakuButtons();
+    }
+
+    function updateYakuButtons() {
+        document.querySelectorAll('.yaku-btn').forEach(btn => {
+            const yakuId = btn.dataset.yakuId;
+            const yaku = yakuData.find(y => y.id === yakuId);
+            const state = gameState.yakuStates[yakuId];
+            
+            btn.classList.remove('state-1', 'state-2');
+            let text = yaku.name_jp;
+            
+            if (state === 1) {
+                btn.classList.add('state-1');
+                text += ` ${yaku.han_closed}飜`;
+            } else if (state === 2) {
+                btn.classList.add('state-2');
+                text += ` ${yaku.han_open}飜`;
+            }
+            btn.innerHTML = text;
+        });
     }
 
     function updateRadioStyles() {
@@ -228,12 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetAll() {
-        gameState = {
-            isOya: true, honba: 0, dora: 0, uraDora: 0, akaDora: 0, sangenpai: 0, bakaze: 0, jikaze: 0,
-            isRiichi: false, isIppatsu: false, isMenzen: true, winMethod: 'tsumo', showFuBreakdown: false,
-            yakuSelected: [], fuConditions: { wait: 'ryanmen', pair: 'non_value', melds: JSON.parse(JSON.stringify(initialMelds)) },
-            options: { kiriageMangan: true }
-        };
+        gameState = getInitialGameState();
         updateAndCalculate();
     }
 
