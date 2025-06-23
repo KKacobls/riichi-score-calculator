@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>日本麻將分數計算器</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Warm Neutral with Muted Green Accents -->
-    <!-- Application Structure Plan: The app uses a responsive grid. A key change is the unified yaku list, where each yaku is a button with a 3-state cycle (Off -> Closed Han -> Open Han). This provides granular, manual control over each yaku's value, decoupling it from the global Menzen/Fuuro toggle for maximum flexibility. -->
-    <!-- Visualization & Content Choices: The primary UI change is converting all yaku into stateful buttons. The button's text and color dynamically update to reflect its state (e.g., "Honitsu 3 Han" in bright green, "Honitsu 2 Han" in dull green, "Honitsu" in grey). This gives immediate, clear feedback on the user's selection and the resulting han value. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <link rel="stylesheet" href="css/style.css">
     <script src="js/script.js"></script>
 </head>
@@ -24,7 +20,6 @@
             
             <div class="lg:col-span-2 space-y-6">
 
-                <!-- Section 1: Game Settings -->
                 <section class="bg-white p-6 rounded-xl shadow-sm">
                     <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">基本設定</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -49,12 +44,10 @@
                     </div>
                 </section>
 
-                <!-- Section 1.5: Dora & Yakuhai -->
-                 <section class="bg-white p-6 rounded-xl shadow-sm">
+                <section class="bg-white p-6 rounded-xl shadow-sm">
                     <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">飜數來源</h2>
                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="flex flex-col"><label class="font-semibold text-slate-600">寶牌 (Dora)</label><div class="flex items-center mt-2"><button data-target="dora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="dora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="dora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
-                        <div class="flex flex-col"><label class="font-semibold text-slate-600">裏寶牌 (Ura)</label><div class="flex items-center mt-2"><button data-target="uraDora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="uraDora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="uraDora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
                         <div class="flex flex-col"><label class="font-semibold text-slate-600">赤寶牌 (Aka)</label><div class="flex items-center mt-2"><button data-target="akaDora" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="akaDora-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="akaDora" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
                         <div class="flex flex-col"><label class="font-semibold text-slate-600">役牌：白發中</label><div class="flex items-center mt-2"><button data-target="sangenpai" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="sangenpai-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="sangenpai" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
                         <div class="flex flex-col"><label class="font-semibold text-slate-600">役牌：場風</label><div class="flex items-center mt-2"><button data-target="bakaze" class="counter-btn minus px-4 py-2 bg-slate-200 rounded-l-lg font-bold text-lg">-</button><input disabled type="number" id="bakaze-display" value="0" class="w-full text-center p-2 border-t border-b bg-white border-slate-300 outline-none"><button data-target="bakaze" class="counter-btn plus px-4 py-2 bg-slate-200 rounded-r-lg font-bold text-lg">+</button></div></div>
@@ -62,7 +55,6 @@
                      </div>
                  </section>
                 
-                <!-- Section 2: Yaku List (Unified) -->
                 <section class="bg-white p-6 rounded-xl shadow-sm">
                      <div class="flex justify-between items-center mb-4 border-b pb-2 flex-wrap gap-4">
                         <h2 class="text-2xl font-bold text-slate-700">役種選擇</h2>
@@ -78,11 +70,9 @@
                        </div>
                     </div>
                     <div id="yaku-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <!-- Yaku buttons will be inserted here -->
-                    </div>
+                        </div>
                 </section>
 
-                <!-- Section 3: Fu Conditions -->
                 <section id="fu-details" class="bg-white p-6 rounded-xl shadow-sm">
                     <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-slate-700">符數條件</h2>
                      <div class="space-y-6">
@@ -99,20 +89,34 @@
                 </section>
             </div>
 
-            <!-- Right Column: Results -->
             <div class="lg:col-span-1">
                 <div class="sticky top-8 bg-slate-800 text-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-3xl font-bold mb-6 border-b border-slate-600 pb-3">計算結果</h2>
+                    
                     <div class="space-y-2">
                         <div class="flex justify-between items-baseline"><span class="text-lg text-slate-300">飜數 (Han)</span><span id="han-result" class="text-4xl font-bold text-green-400">0</span></div>
                         <div>
                             <div class="flex justify-between items-baseline"><span class="text-lg text-slate-300">符數 (Fu)</span><span id="fu-result" class="text-4xl font-bold text-sky-400">0</span></div>
                             <div id="fu-breakdown" class="text-right text-xs text-sky-300 mt-1 h-4 opacity-0"></div>
                         </div>
-                        <div class="pt-4 border-t border-slate-600">
-                             <div id="score-breakdown-title" class="text-lg text-slate-300 mb-2">點數支付</div>
-                             <div id="score-result" class="text-2xl font-bold text-amber-400 text-center h-24 flex items-center justify-center">請選擇和牌條件</div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-600 space-y-4">
+                        <div>
+                            <label class="font-semibold text-slate-300">裏寶牌 (Ura)</label>
+                            <div class="flex items-center mt-1">
+                                <button data-target="uraDora" class="counter-btn minus px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-l-lg font-bold text-lg">-</button>
+                                <input disabled type="number" id="uraDora-display" value="0" class="w-full text-center p-2 bg-slate-700 border-t border-b border-slate-600 outline-none text-white">
+                                <button data-target="uraDora" class="counter-btn plus px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-r-lg font-bold text-lg">+</button>
+                            </div>
                         </div>
+                        <div id="han-breakdown-list" class="text-sm text-slate-200">
+                            </div>
+                    </div>
+
+                    <div class="pt-4 mt-4 border-t border-slate-600">
+                         <div id="score-breakdown-title" class="text-lg text-slate-300 mb-2">點數支付</div>
+                         <div id="score-result" class="text-2xl font-bold text-amber-400 text-center h-24 flex items-center justify-center">請選擇和牌條件</div>
                     </div>
                     <button id="clear-btn" class="w-full mt-8 p-4 rounded-lg font-bold text-slate-800 bg-amber-400 hover:bg-amber-300 control-button">全部清除</button>
                 </div>

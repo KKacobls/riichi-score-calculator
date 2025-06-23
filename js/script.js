@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             options: { kiriageMangan: true, }
         };
-        // Initialize all yaku states to 0 (off)
         yakuData.forEach(yaku => {
             initialState.yakuStates[yaku.id] = 0;
         });
@@ -61,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         riichiCheck: document.getElementById('riichi-check'),
         ippatsuCheck: document.getElementById('ippatsu-check'),
         fuCheck: document.getElementById('fu-check'),
-        fuBreakdownEl: document.getElementById('fu-breakdown')
+        fuBreakdownEl: document.getElementById('fu-breakdown'),
+        hanBreakdownList: document.getElementById('han-breakdown-list')
     };
     
     function init() {
@@ -111,13 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentState = gameState.yakuStates[yakuId];
             let nextState = 0;
 
-            // State machine logic
-            if (yaku.han_open !== null && yaku.han_open < yaku.han_closed) { // Has kui-sagari
-                if (currentState === 0) nextState = 1;      // Off -> Closed
-                else if (currentState === 1) nextState = 2; // Closed -> Open
-                else nextState = 0;                         // Open -> Off
-            } else { // No kui-sagari
-                nextState = currentState === 0 ? 1 : 0; // Off <-> On
+            if (yaku.han_open !== null && yaku.han_open < yaku.han_closed) { 
+                if (currentState === 0) nextState = 1;      
+                else if (currentState === 1) nextState = 2; 
+                else nextState = 0;                         
+            } else { 
+                nextState = currentState === 0 ? 1 : 0; 
             }
             
             gameState.yakuStates[yakuId] = nextState;
@@ -132,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('input[name="winMethod"], input[name="menzen"]').forEach(radio => radio.addEventListener('change', () => {
             gameState.winMethod = document.querySelector('input[name="winMethod"]:checked').value;
             gameState.isMenzen = document.querySelector('input[name="menzen"]:checked').value === 'true';
-            handleMenzenChange(); updateAndCalculate();
+            updateRadioStyles(); updateAndCalculate();
         }));
         document.querySelectorAll('input[name="wait"], input[name="pair"]').forEach(radio => radio.addEventListener('change', () => {
              gameState.fuConditions.wait = document.querySelector('input[name="wait"]:checked').value;
@@ -152,16 +151,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function handleYakuDependencies() {
-        if (gameState.yakuStates['chiitoitsu'] > 0 || gameState.yakuStates['pinfu'] > 0) {
-            document.querySelector('input[name="menzen"][value="true"]').checked = true;
+        let needsMenzen = false;
+        yakuData.forEach(yaku => {
+            if (yaku.han_open === null && gameState.yakuStates[yaku.id] > 0) {
+                needsMenzen = true;
+            }
+        });
+
+        if (needsMenzen) {
             gameState.isMenzen = true;
         }
-    }
-    
-    function handleMenzenChange() {
-        // This function is now simpler, mainly just for UI updates.
-        // The core logic of han value is now controlled by the yaku state machine.
-        updateRadioStyles();
+
+        if (gameState.yakuStates['tsumo'] > 0) {
+            gameState.winMethod = 'tsumo';
+        }
     }
 
     function updateAndCalculate() { updateUIFromState(); calculateAndDisplay(); }
@@ -174,15 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateHan() {
         let totalHan = 0; 
-        
-        // Calculate from yaku states
         for (const yakuId in gameState.yakuStates) {
             const state = gameState.yakuStates[yakuId];
             if (state > 0) {
                 const yaku = yakuData.find(y => y.id === yakuId);
-                if (state === 1) { // Closed state or only one state
+                if (state === 1) { 
                     totalHan += yaku.han_closed;
-                } else if (state === 2) { // Open state
+                } else if (state === 2) {
                     totalHan += yaku.han_open;
                 }
             }
@@ -224,6 +225,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return { finalFu, breakdown, rawFu: fu };
     }
 
+    function getHanBreakdown() {
+        const breakdown = [];
+        const { yakuStates, isRiichi, isIppatsu, sangenpai, bakaze, jikaze, dora, akaDora, uraDora } = gameState;
+
+        for (const yakuId in yakuStates) {
+            const state = yakuStates[yakuId];
+            if (state > 0) {
+                const yaku = yakuData.find(y => y.id === yakuId);
+                let han = 0;
+                let name = yaku.name_jp.split('(')[0];
+                if (state === 1) { 
+                    han = yaku.han_closed;
+                } else if (state === 2) { 
+                    han = yaku.han_open;
+                }
+                if (han > 0) breakdown.push({ reason: name, han: han });
+            }
+        }
+
+        if (isRiichi) breakdown.push({ reason: '立直', han: 1 });
+        if (isIppatsu) breakdown.push({ reason: '一發', han: 1 });
+        if (sangenpai > 0) breakdown.push({ reason: '役牌：三元牌', han: sangenpai });
+        if (bakaze > 0) breakdown.push({ reason: '役牌：場風', han: bakaze });
+        if (jikaze > 0) breakdown.push({ reason: '役牌：自風', han: jikaze });
+        if (dora > 0) breakdown.push({ reason: '寶牌', han: dora });
+        if (akaDora > 0) breakdown.push({ reason: '赤寶牌', han: akaDora });
+        if (uraDora > 0) breakdown.push({ reason: '裏寶牌', han: uraDora });
+        
+        return breakdown;
+    }
+
     function getScore(han, fu) {
         if (han === 0) return { ron: 0, tsumo_ko: 0, tsumo_oya: 0 };
         const ceil100 = (val) => Math.ceil(val / 100) * 100; let basePoints;
@@ -237,16 +269,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return scores;
     }
 
-    function displayResults(han, fu, breakdown) {
+    function displayResults(han, fu, fuBreakdownData) {
         DOMElements.hanResultEl.textContent = han; DOMElements.fuResultEl.textContent = fu;
-        if (gameState.showFuBreakdown && breakdown) {
-            const breakdownText = breakdown.map(item => `${item.reason}${item.fu}`).join('+');
-            const rawFu = breakdown.reduce((sum, item) => sum + item.fu, 0);
+
+        if (gameState.showFuBreakdown && fuBreakdownData) {
+            const breakdownText = fuBreakdownData.map(item => `${item.reason}${item.fu}`).join('+');
+            const rawFu = fuBreakdownData.reduce((sum, item) => sum + item.fu, 0);
             DOMElements.fuBreakdownEl.textContent = (fu !== rawFu && fu > 20) ? `${breakdownText} = ${rawFu} → ${fu}符` : breakdownText;
             DOMElements.fuBreakdownEl.classList.remove('opacity-0');
         } else {
             DOMElements.fuBreakdownEl.classList.add('opacity-0');
         }
+
+        const hanBreakdown = getHanBreakdown();
+        if (hanBreakdown.length > 0) {
+            const hanBreakdownHtml = hanBreakdown.map(item => `
+                <div class="flex justify-between items-center text-slate-200">
+                    <span>${item.reason}</span>
+                    <span class="font-medium text-green-300">${item.han} 飜</span>
+                </div>
+            `).join('');
+            DOMElements.hanBreakdownList.innerHTML = `<h3 class="font-semibold text-slate-300 mb-2 pb-1 border-b border-slate-700">飜數明細</h3><div class="space-y-1">${hanBreakdownHtml}</div>`;
+        } else {
+            DOMElements.hanBreakdownList.innerHTML = '';
+        }
+
         if (han === 0) { DOMElements.scoreResultEl.innerHTML = `請選擇和牌條件`; DOMElements.scoreBreakdownTitleEl.textContent = `點數支付`; return; }
         const scores = getScore(han, fu); let scoreText = '';
         let titleText = `${gameState.isOya ? '莊家' : '子家'} ${gameState.winMethod === 'ron' ? '榮和' : '自摸'}`;
